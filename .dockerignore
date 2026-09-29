@@ -1,0 +1,13 @@
+node_modules
+dist
+data
+.env
+.env.*
+!.env.example
+.git
+.DS_Store
+*.pdf
+UI компоненты и цветовая палитра
+docs
+tests
+*.tsbuildinfo
