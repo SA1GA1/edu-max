@@ -1,0 +1,85 @@
+schema_version: 1
+solution: EDU
+base_url: https://edu-pf-tech.ru/api/v1
+openapi: docs/openapi.json
+authentication:
+  type: apiKey
+  header: Authorization
+  value_format: 'MaxInit <подписанный WebAppData тестового пользователя>'
+test_data:
+  profile: 'Учётная запись MAX с валидным WebAppData; пароль и обход авторизации не используются'
+  task_id: html-portfolio
+  direction_id: frontend
+  repository_url: 'https://github.com/SA1GA1/edu-max'
+checks:
+  - id: bootstrap
+    required: true
+    role: learner
+    method: GET
+    path: /me/bootstrap
+    expected_status: [200]
+    response:
+      content_type: application/json
+      required_fields: [profile, settings]
+  - id: directions
+    required: true
+    role: learner
+    method: GET
+    path: /directions
+    expected_status: [200]
+    response:
+      content_type: application/json
+      required_fields: [items, nextCursor]
+  - id: roadmap
+    required: true
+    role: learner
+    method: GET
+    path: /directions/{direction_id}/roadmap
+    path_params: { direction_id: frontend }
+    expected_status: [200]
+    response:
+      content_type: application/json
+      required_fields: [direction, levels]
+  - id: accept_task
+    required: true
+    role: learner
+    method: POST
+    path: /tasks/{task_id}/accept
+    path_params: { task_id: html-portfolio }
+    expected_status: [200]
+    response:
+      content_type: application/json
+      required_fields: [status]
+  - id: submit_task
+    required: true
+    role: learner
+    method: POST
+    path: /tasks/{task_id}/submit
+    path_params: { task_id: html-portfolio }
+    headers:
+      Idempotency-Key: '<UUID>'
+    body:
+      repositoryUrl: 'https://github.com/SA1GA1/edu-max'
+    expected_status: [202]
+    response:
+      content_type: application/json
+      required_fields: [submissionId, status]
+  - id: submission_result
+    required: true
+    role: learner
+    method: GET
+    path: /submissions/{submission_id}
+    path_params: { submission_id: '<из submit_task>' }
+    expected_status: [200]
+    response:
+      content_type: application/json
+      required_fields: [submissionId, taskId, status]
+  - id: auth_required
+    required: true
+    role: anonymous
+    method: GET
+    path: /me/bootstrap
+    expected_status: [401]
+    response:
+      content_type: application/json
+      required_fields: [error]
